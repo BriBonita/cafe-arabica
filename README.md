@@ -81,7 +81,7 @@ cafe-arabica/
 
 ```bash
 # 1. Clonar el repositorio
-git clone https://github.com/tu-usuario/cafe-arabica.git
+git clone https://github.com/BriBonita/cafe-arabica.git
 cd cafe-arabica
 
 # 2. Levantar todos los servicios
@@ -112,10 +112,10 @@ aws cloudformation deploy \
   --template-file cloudformation/template.yaml \
   --stack-name cafe-arabica-stack \
   --parameter-overrides \
-      KeyPairName=mi-llave \
-      MyPublicIP=<TU_IP>/32 \
-      RepoURL=https://github.com/tu-usuario/cafe-arabica.git \
-      BucketName=cafe-arabica-mi-bucket \
+      KeyPairName=vockey \
+      MyPublicIP=201.163.37.155/32 \
+      RepoURL=https://github.com/BriBonita/cafe-arabica.git \
+      BucketName=cafe-arabica-bri-bucket \
   --capabilities CAPABILITY_NAMED_IAM
 ```
 
@@ -129,10 +129,10 @@ ssh -i mi-llave.pem ec2-user@<IP_PUBLICA_EC2>
 
 ```bash
 cd /opt/cafe-arabica
-bash deploy.sh https://github.com/tu-usuario/cafe-arabica.git
+bash deploy.sh https://github.com/BriBonita/cafe-arabica.git
 ```
 
-La app estará en: **http://\<IP_PUBLICA_EC2\>:8080**
+La app estará en: **http://54.167.101.124:8080**
 
 ---
 
