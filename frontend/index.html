@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Café Arábica – Sabor que enamora</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Lato:wght@300;400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ─── NAVBAR ─────────────────────────────────────────────────────────── -->
+  <nav class="navbar" id="navbar">
+    <div class="nav-brand">
+      <span class="nav-logo">☕</span>
+      <span class="nav-name">Café Arábica</span>
+    </div>
+    <ul class="nav-links">
+      <li><a href="#inicio"      class="nav-link active">Inicio</a></li>
+      <li><a href="#menu"        class="nav-link">Menú</a></li>
+      <li><a href="#nosotros"    class="nav-link">Nosotros</a></li>
+      <li><a href="#reservar"    class="nav-link">Reservar</a></li>
+      <li><a href="#contacto"    class="nav-link">Contacto</a></li>
+    </ul>
+    <button class="nav-toggle" id="navToggle" aria-label="Abrir menú">&#9776;</button>
+  </nav>
+
+  <!-- ─── HERO ────────────────────────────────────────────────────────────── -->
+  <section class="hero" id="inicio">
+    <div class="hero-overlay"></div>
+    <div class="hero-content">
+      <p class="hero-eyebrow">Bienvenidos a</p>
+      <h1 class="hero-title">Café Arábica</h1>
+      <p class="hero-subtitle">Donde cada taza cuenta una historia</p>
+      <div class="hero-cta">
+        <a href="#menu"   class="btn btn-primary">Ver Menú</a>
+        <a href="#reservar" class="btn btn-outline">Reservar Mesa</a>
+      </div>
+    </div>
+    <div class="hero-scroll">
+      <span>Descubre más</span>
+      <div class="scroll-line"></div>
+    </div>
+  </section>
+
+  <!-- ─── FEATURES STRIP ──────────────────────────────────────────────────── -->
+  <section class="features-strip">
+    <div class="feature-item">
+      <span class="feature-icon">🌱</span>
+      <div>
+        <h3>Granos orgánicos</h3>
+        <p>Origen único, tostado artesanal</p>
+      </div>
+    </div>
+    <div class="feature-item">
+      <span class="feature-icon">👨‍🍳</span>
+      <div>
+        <h3>Baristas certificados</h3>
+        <p>SCA Barista Intermediate</p>
+      </div>
+    </div>
+    <div class="feature-item">
+      <span class="feature-icon">🏡</span>
+      <div>
+        <h3>Ambiente acogedor</h3>
+        <p>Música en vivo los viernes</p>
+      </div>
+    </div>
+    <div class="feature-item">
+      <span class="feature-icon">🕗</span>
+      <div>
+        <h3>Abierto todos los días</h3>
+        <p>7:00 am – 10:00 pm</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── MENÚ ─────────────────────────────────────────────────────────────── -->
+  <section class="menu-section" id="menu">
+    <div class="section-header">
+      <p class="section-tag">Lo que ofrecemos</p>
+      <h2 class="section-title">Nuestro Menú</h2>
+      <p class="section-desc">Ingredientes seleccionados, preparaciones con alma y presentaciones que deleitan.</p>
+    </div>
+
+    <!-- Category Filter Tabs -->
+    <div class="menu-tabs">
+      <button class="tab-btn active" data-cat="all">Todo</button>
+      <button class="tab-btn" data-cat="cafe">Cafés</button>
+      <button class="tab-btn" data-cat="bebidas">Bebidas</button>
+      <button class="tab-btn" data-cat="postres">Postres</button>
+      <button class="tab-btn" data-cat="desayunos">Desayunos</button>
+    </div>
+
+    <div class="menu-grid" id="menuGrid">
+      <!-- Cards rendered by JS -->
+      <div class="menu-loading">
+        <div class="spinner"></div>
+        <p>Cargando menú…</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── ABOUT ────────────────────────────────────────────────────────────── -->
+  <section class="about-section" id="nosotros">
+    <div class="about-image">
+      <div class="about-img-inner"></div>
+      <div class="about-badge">
+        <span class="badge-num">12</span>
+        <span class="badge-text">años sirviendo<br/>el mejor café</span>
+      </div>
+    </div>
+    <div class="about-content">
+      <p class="section-tag">Nuestra historia</p>
+      <h2 class="section-title">Pasión desde<br/>el primer sorbo</h2>
+      <p class="about-text">
+        Café Arábica nació en 2012 de un sueño sencillo: ofrecer a nuestra ciudad
+        un espacio donde el café fuera el protagonista. Importamos granos de finca
+        directamente desde Chiapas, Veracruz y Oaxaca, tostados en pequeños lotes
+        para preservar sus notas únicas.
+      </p>
+      <p class="about-text">
+        Cada preparación es un ritual: desde la selección del origen hasta la
+        extracción milimétrica de cada espresso. Nuestros baristas se certifican
+        anualmente con la SCA (Specialty Coffee Association).
+      </p>
+      <div class="about-stats">
+        <div class="stat">
+          <span class="stat-num">18+</span>
+          <span class="stat-label">Orígenes de grano</span>
+        </div>
+        <div class="stat">
+          <span class="stat-num">500</span>
+          <span class="stat-label">Tazas diarias</span>
+        </div>
+        <div class="stat">
+          <span class="stat-num">4.9★</span>
+          <span class="stat-label">Calificación Google</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── GALLERY STRIP ────────────────────────────────────────────────────── -->
+  <section class="gallery-strip">
+    <div class="gallery-cell g1"></div>
+    <div class="gallery-cell g2"></div>
+    <div class="gallery-cell g3"></div>
+    <div class="gallery-cell g4"></div>
+  </section>
+
+  <!-- ─── RESERVATION ──────────────────────────────────────────────────────── -->
+  <section class="reservation-section" id="reservar">
+    <div class="reservation-inner">
+      <div class="section-header light">
+        <p class="section-tag">¿Vienes a visitarnos?</p>
+        <h2 class="section-title">Reserva tu mesa</h2>
+        <p class="section-desc">Asegura tu lugar y disfruta una experiencia sin esperas.</p>
+      </div>
+      <form class="reservation-form" id="reservationForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="res-name">Nombre completo</label>
+            <input type="text" id="res-name" placeholder="Ej. Ana García" required />
+          </div>
+          <div class="form-group">
+            <label for="res-email">Correo electrónico</label>
+            <input type="email" id="res-email" placeholder="ana@correo.com" required />
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label for="res-date">Fecha</label>
+            <input type="date" id="res-date" required />
+          </div>
+          <div class="form-group">
+            <label for="res-time">Hora</label>
+            <input type="time" id="res-time" min="07:00" max="21:30" required />
+          </div>
+          <div class="form-group">
+            <label for="res-guests">Personas</label>
+            <select id="res-guests">
+              <option value="1">1 persona</option>
+              <option value="2" selected>2 personas</option>
+              <option value="3">3 personas</option>
+              <option value="4">4 personas</option>
+              <option value="5">5 personas</option>
+              <option value="6">6 personas</option>
+            </select>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary btn-full">Confirmar Reservación</button>
+      </form>
+      <div class="form-toast" id="formToast"></div>
+    </div>
+  </section>
+
+  <!-- ─── CONTACT / FOOTER ─────────────────────────────────────────────────── -->
+  <footer class="footer" id="contacto">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="footer-logo">☕ Café Arábica</div>
+        <p>El mejor café de especialidad de la ciudad, desde 2012.</p>
+        <div class="social-links">
+          <a href="#" class="social-btn">IG</a>
+          <a href="#" class="social-btn">FB</a>
+          <a href="#" class="social-btn">WA</a>
+        </div>
+      </div>
+      <div class="footer-col">
+        <h4>Horarios</h4>
+        <ul>
+          <li>Lunes – Viernes: 7:00 – 22:00</li>
+          <li>Sábado: 8:00 – 23:00</li>
+          <li>Domingo: 8:00 – 21:00</li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Contacto</h4>
+        <ul>
+          <li>📍 Calle Reforma 420, CDMX</li>
+          <li>📞 (55) 1234-5678</li>
+          <li>✉️ hola@cafearabica.mx</li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Menú rápido</h4>
+        <ul>
+          <li><a href="#inicio">Inicio</a></li>
+          <li><a href="#menu">Menú</a></li>
+          <li><a href="#nosotros">Nosotros</a></li>
+          <li><a href="#reservar">Reservar</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2026 Café Arábica · Todos los derechos reservados</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>

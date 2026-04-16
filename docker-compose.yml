@@ -1,0 +1,72 @@
+version: "3.9"
+
+# ─── Networks ────────────────────────────────────────────────────────────────
+networks:
+  cafe_net:
+    driver: bridge
+
+# ─── Volumes ─────────────────────────────────────────────────────────────────
+volumes:
+  db_data:
+  app_logs:
+
+# ─── Services ────────────────────────────────────────────────────────────────
+services:
+
+  # ── MySQL database ──────────────────────────────────────────────────────────
+  db:
+    image: mysql:8.0
+    container_name: cafe_db
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE:      cafe_arabica
+      MYSQL_USER:          cafe_user
+      MYSQL_PASSWORD:      cafe_password
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    networks:
+      - cafe_net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-ucafe_user", "-pcafe_password"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Flask backend ───────────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: cafe_backend
+    restart: unless-stopped
+    environment:
+      MYSQL_HOST:     db
+      MYSQL_USER:     cafe_user
+      MYSQL_PASSWORD: cafe_password
+      MYSQL_DB:       cafe_arabica
+      LOG_DIR:        /app/logs
+    volumes:
+      - app_logs:/app/logs
+    ports:
+      - "5000:5000"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - cafe_net
+
+  # ── Nginx frontend ──────────────────────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: cafe_frontend
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    depends_on:
+      - backend
+    networks:
+      - cafe_net

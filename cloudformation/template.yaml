@@ -1,0 +1,227 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Description: >
+  Infraestructura de Café Arábica – EC2 (app) + S3 (logs/estáticos).
+  Despliega una instancia EC2 con Docker y Docker Compose, y un bucket S3
+  para almacenar logs y archivos estáticos de la aplicación.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Parámetros
+# ─────────────────────────────────────────────────────────────────────────────
+Parameters:
+
+  KeyPairName:
+    Type: AWS::EC2::KeyPair::KeyName
+    Description: Par de llaves SSH para acceder a la instancia EC2.
+
+  InstanceType:
+    Type: String
+    Default: t2.micro
+    AllowedValues: [t2.micro, t2.small, t3.micro, t3.small]
+    Description: Tipo de instancia EC2.
+
+  MyPublicIP:
+    Type: String
+    Description: >
+      Tu IP pública con CIDR (ej. 203.0.113.10/32) para el acceso SSH restringido.
+      NOTA DE SEGURIDAD: NO usar 0.0.0.0/0 en producción porque expone el puerto
+      SSH a todo Internet, facilitando ataques de fuerza bruta.
+
+  RepoURL:
+    Type: String
+    Default: https://github.com/tu-usuario/cafe-arabica.git
+    Description: URL del repositorio GitHub del proyecto.
+
+  BucketName:
+    Type: String
+    Default: cafe-arabica-assets
+    Description: Nombre único global para el bucket S3.
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Recursos
+# ─────────────────────────────────────────────────────────────────────────────
+Resources:
+
+  # ── S3 Bucket – logs y archivos estáticos ──────────────────────────────────
+  CafeS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BucketName
+      # Bloquear acceso público (buena práctica de seguridad)
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls:       true
+        BlockPublicPolicy:     true
+        IgnorePublicAcls:      true
+        RestrictPublicBuckets: true
+      VersioningConfiguration:
+        Status: Enabled
+      LifecycleConfiguration:
+        Rules:
+          - Id: ExpireOldLogs
+            Status: Enabled
+            ExpirationInDays: 90
+            Prefix: logs/
+      Tags:
+        - Key: Project
+          Value: CafeArabica
+
+  # ── IAM Role para EC2 (acceso a S3) ────────────────────────────────────────
+  EC2InstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: CafeArabicaEC2Role
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: ec2.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: CafeS3Access
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              # Solo lectura/escritura en el bucket del proyecto (principio de mínimo privilegio)
+              - Effect: Allow
+                Action:
+                  - s3:PutObject
+                  - s3:GetObject
+                  - s3:DeleteObject
+                  - s3:ListBucket
+                Resource:
+                  - !Sub arn:aws:s3:::${BucketName}
+                  - !Sub arn:aws:s3:::${BucketName}/*
+
+  EC2InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Roles:
+        - !Ref EC2InstanceRole
+
+  # ── Security Group ──────────────────────────────────────────────────────────
+  # CONFIGURACIÓN DE SECURITY GROUPS – PUERTOS NECESARIOS:
+  #
+  #   Puerto 22  (SSH)  – Acceso administrativo. RESTRINGIR a tu IP (MyPublicIP).
+  #                       NUNCA usar 0.0.0.0/0 en producción porque cualquier
+  #                       host de Internet podría intentar conectarse.
+  #
+  #   Puerto 80  (HTTP) – Tráfico web desde cualquier origen (necesario para
+  #                       que los usuarios lleguen al frontend).
+  #
+  #   Puerto 443 (HTTPS)– Tráfico web cifrado (recomendado añadir certificado TLS).
+  #
+  #   Puerto 5000       – API Flask backend. Si el frontend está en el mismo host,
+  #                       no necesita abrirse al exterior; se accede internamente.
+  #                       En producción limitarlo a la IP del load balancer.
+  #
+  #   Puerto 8080       – Nginx frontend (p. ej. si usas docker-compose con
+  #                       mapeo 8080:80). Abierto al mundo para acceso web.
+  #
+  #   Puertos 3000/5173 – Desarrollo local (Vite / React dev server).
+  #                       NO abrir en producción.
+  CafeSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Security Group para Café Arábica
+      SecurityGroupIngress:
+        # SSH – SOLO desde tu IP personal (no abrir a 0.0.0.0/0)
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          CidrIp: !Ref MyPublicIP
+          Description: SSH restringido a IP del administrador
+
+        # HTTP público
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+          Description: Tráfico HTTP público
+
+        # HTTPS público
+        - IpProtocol: tcp
+          FromPort: 443
+          ToPort: 443
+          CidrIp: 0.0.0.0/0
+          Description: Tráfico HTTPS público
+
+        # Frontend en puerto 8080
+        - IpProtocol: tcp
+          FromPort: 8080
+          ToPort: 8080
+          CidrIp: 0.0.0.0/0
+          Description: Frontend Nginx
+
+      SecurityGroupEgress:
+        - IpProtocol: "-1"
+          CidrIp: 0.0.0.0/0
+          Description: Todo el tráfico de salida permitido
+
+      Tags:
+        - Key: Project
+          Value: CafeArabica
+
+  # ── EC2 Instance ────────────────────────────────────────────────────────────
+  CafeEC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref InstanceType
+      KeyName: !Ref KeyPairName
+      # Amazon Linux 2023 (AMI pública us-east-1 – actualiza según tu región)
+      ImageId: ami-0c101f26f147fa7fd
+      IamInstanceProfile: !Ref EC2InstanceProfile
+      SecurityGroups:
+        - !Ref CafeSecurityGroup
+      BlockDeviceMappings:
+        - DeviceName: /dev/xvda
+          Ebs:
+            VolumeSize: 20
+            VolumeType: gp3
+      UserData:
+        # Script ejecutado al lanzar la instancia por primera vez
+        Fn::Base64: !Sub |
+          #!/bin/bash
+          set -euo pipefail
+          yum update -y
+
+          # Instalar Git
+          yum install -y git
+
+          # Instalar Docker
+          yum install -y docker
+          systemctl enable --now docker
+          usermod -aG docker ec2-user
+
+          # Instalar Docker Compose v2
+          DOCKER_COMPOSE_VERSION="v2.27.0"
+          curl -SL "https://github.com/docker/compose/releases/download/${!DOCKER_COMPOSE_VERSION}/docker-compose-linux-x86_64" \
+            -o /usr/local/bin/docker-compose
+          chmod +x /usr/local/bin/docker-compose
+
+          # Clonar repositorio y desplegar
+          git clone ${RepoURL} /opt/cafe-arabica
+          cd /opt/cafe-arabica
+          bash deploy.sh
+
+      Tags:
+        - Key: Name
+          Value: CafeArabicaServer
+        - Key: Project
+          Value: CafeArabica
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Outputs
+# ─────────────────────────────────────────────────────────────────────────────
+Outputs:
+
+  EC2PublicIP:
+    Description: IP pública de la instancia EC2
+    Value: !GetAtt CafeEC2Instance.PublicIp
+
+  AppURL:
+    Description: URL para acceder a la aplicación
+    Value: !Sub http://${CafeEC2Instance.PublicIp}:8080
+
+  S3BucketName:
+    Description: Nombre del bucket S3 para logs y estáticos
+    Value: !Ref CafeS3Bucket
